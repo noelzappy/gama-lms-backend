@@ -1,39 +1,38 @@
 import { NextFunction, Response } from 'express';
-import { verify } from 'jsonwebtoken';
-import { SECRET_KEY } from '@config';
 import { HttpException } from '@exceptions/httpException';
-import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
-import { UserModel } from '@models/users.model';
+import { RequestWithUser } from '@interfaces/auth.interface';
+import httpStatus from 'http-status';
+import { User } from '@/interfaces/users.interface';
+import passport from 'passport';
+import { ROLE_RIGHTS } from '@/config/roles';
 
-const getAuthorization = (req) => {
-  const coockie = req.cookies['Authorization'];
-  if (coockie) return coockie;
+const AUTH_ERR_MSG = 'Please authenticate';
 
-  const header = req.header('Authorization');
-  if (header) return header.split('Bearer ')[1];
-
-  return null;
-}
-
-export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-  try {
-    const Authorization = getAuthorization(req);
-
-    if (Authorization) {
-      const { _id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
-      const findUser = await UserModel.findById(_id);
-
-      if (findUser) {
-        req.user = findUser;
-        next();
-      } else {
-        next(new HttpException(401, 'Wrong authentication token'));
-      }
-    } else {
-      next(new HttpException(404, 'Authentication token missing'));
-    }
-  } catch (error) {
-    next(new HttpException(401, 'Wrong authentication token'));
+const verifyCallback = (req: RequestWithUser, resolve, reject, requiredRights: string[]) => async (err, user: User, info) => {
+  if (err || info || !user) {
+    return reject(new HttpException(httpStatus.UNAUTHORIZED, AUTH_ERR_MSG));
   }
+
+  req.user = user;
+
+  if (requiredRights && requiredRights.length && !user.role) {
+    return reject(new HttpException(httpStatus.FORBIDDEN, 'Forbidden'));
+  }
+  if (requiredRights.length) {
+    const userRights = ROLE_RIGHTS.get(user.role);
+    const hasRequiredRights = requiredRights.every(requiredRight => userRights.includes(requiredRight as any));
+    if (!hasRequiredRights && req.params?.userId !== user.id) {
+      return reject(new HttpException(httpStatus.FORBIDDEN, 'Forbidden'));
+    }
+  }
+
+  resolve();
 };
 
+export const AuthMiddleware = (requiredRights: string[]) => async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  return new Promise((resolve, reject) => {
+    passport.authenticate('jwt', { session: false }, verifyCallback(req, resolve, reject, requiredRights))(req, res, next);
+  })
+    .then(() => next())
+    .catch(err => next(err));
+};

@@ -13,6 +13,8 @@ import { dbConnection } from '@database';
 import { Routes } from '@interfaces/routes.interface';
 import { ErrorMiddleware } from '@middlewares/error.middleware';
 import { logger, stream } from '@utils/logger';
+import passport from 'passport';
+import jwtStrategy from './config/passport';
 
 export class App {
   public app: express.Application;
@@ -57,6 +59,10 @@ export class App {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
+
+    // jwt authentication
+    this.app.use(passport.initialize());
+    passport.use('jwt', jwtStrategy);
   }
 
   private initializeRoutes(routes: Routes[]) {
@@ -69,7 +75,7 @@ export class App {
     const options = {
       swaggerDefinition: {
         info: {
-          title: 'REST API',
+          title: 'GAMA LMS API',
           version: '1.0.0',
           description: 'Example docs',
         },
