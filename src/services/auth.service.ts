@@ -1,52 +1,124 @@
 import { hash, compare } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
-import { Service } from 'typedi';
-import { SECRET_KEY } from '@config';
+import Container, { Service } from 'typedi';
 import { HttpException } from '@exceptions/httpException';
-import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
+import { TokenObj, TokenType } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
 import { UserModel } from '@models/users.model';
-
-const createToken = (user: User): TokenData => {
-  const dataStoredInToken: DataStoredInToken = { _id: user._id };
-  const expiresIn: number = 60 * 60;
-
-  return { expiresIn, token: sign(dataStoredInToken, SECRET_KEY, { expiresIn }) };
-}
-
-const createCookie = (tokenData: TokenData): string => {
-  return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn};`;
-}
+import httpStatus from 'http-status';
+import { TokenService } from './token.service';
+import { LoginUserDto, RegisterUserDto } from '@/dtos/users.dto';
+import { TokenModel } from '@/models/token.model';
+import EmailService from './email.service';
 
 @Service()
 export class AuthService {
-  public async signup(userData: User): Promise<User> {
-    const findUser: User = await UserModel.findOne({ email: userData.email });
-    if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
+  public Token = Container.get(TokenService);
+  public Email = Container.get(EmailService);
+
+  public async signup(userData: RegisterUserDto): Promise<{
+    tokenData: {
+      access: TokenObj;
+      refresh: TokenObj;
+    };
+    user: User;
+  }> {
+    const findUser: User = await UserModel.findOne({ where: { email: userData.email } });
+    if (findUser) throw new HttpException(httpStatus.BAD_REQUEST, 'Email already taken');
 
     const hashedPassword = await hash(userData.password, 10);
+
     const createUserData: User = await UserModel.create({ ...userData, password: hashedPassword });
 
-    return createUserData;
+    const tokenData = await this.Token.generateAuthTokens(createUserData);
+
+    return { tokenData, user: createUserData };
   }
 
-  public async login(userData: User): Promise<{ cookie: string; findUser: User }> {
-    const findUser: User = await UserModel.findOne({ email: userData.email });
-    if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
+  public async login(userData: LoginUserDto): Promise<{
+    tokenData: {
+      access: TokenObj;
+      refresh: TokenObj;
+    };
+    user: User;
+  }> {
+    const findUser: User = await UserModel.findOne({ where: { email: userData.email } });
+    if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
 
     const isPasswordMatching: boolean = await compare(userData.password, findUser.password);
-    if (!isPasswordMatching) throw new HttpException(409, "Password is not matching");
 
-    const tokenData = createToken(findUser);
-    const cookie = createCookie(tokenData);
+    if (!isPasswordMatching) throw new HttpException(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
 
-    return { cookie, findUser };
+    const tokenData = await this.Token.generateAuthTokens(findUser);
+
+    return { tokenData, user: findUser };
   }
 
-  public async logout(userData: User): Promise<User> {
-    const findUser: User = await UserModel.findOne({ email: userData.email, password: userData.password });
-    if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
+  public async logout(userData: User, refreshToken: string): Promise<void> {
+    await TokenModel.remove({ where: { token: refreshToken, type: TokenType.REFRESH, userId: userData.id } });
+  }
 
-    return findUser;
+  public async refreshAuth(refreshToken: string): Promise<{
+    access: TokenObj;
+    refresh: TokenObj;
+  }> {
+    const verifiedToken = await this.Token.verifyToken(refreshToken, TokenType.REFRESH);
+
+    if (!verifiedToken) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid token');
+
+    const findUser: User = await UserModel.findById(verifiedToken.user);
+
+    if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid token');
+
+    const tokenData = await this.Token.generateAuthTokens(findUser);
+
+    return tokenData;
+  }
+
+  public async verifyEmail(token: string): Promise<void> {
+    const verifiedToken = await this.Token.verifyToken(token, TokenType.VERIFY_EMAIL);
+
+    if (!verifiedToken) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid token');
+
+    const findUser = await UserModel.findById(verifiedToken.user);
+
+    if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid token');
+
+    Object.assign(findUser, { isEmailVerified: true });
+
+    await TokenModel.deleteMany({ user: findUser.id, type: TokenType.VERIFY_EMAIL });
+    await findUser.save();
+  }
+
+  public async resetPassword(token: string, password: string): Promise<void> {
+    const verifiedToken = await this.Token.verifyToken(token, TokenType.RESET_PASSWORD);
+
+    if (!verifiedToken) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid token');
+
+    const findUser = await UserModel.findById(verifiedToken.user);
+
+    if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid token');
+
+    const hashedPassword = await hash(password, 10);
+    Object.assign(findUser, { password: hashedPassword });
+    await findUser.save();
+  }
+
+  public async forgotPassword(email: string): Promise<void> {
+    const findUser = await UserModel.findOne({ where: { email } });
+
+    if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid email');
+
+    const token = await this.Token.generateResetPasswordToken(findUser.email);
+    await this.Email.sendResetPasswordEmail(findUser.email, token);
+  }
+
+  public async resendVerificationEmail(email: string): Promise<void> {
+    const findUser: User = await UserModel.findOne({ where: { email } });
+
+    if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid email');
+
+    const token = await this.Token.generateVerifyEmailToken(findUser);
+
+    await this.Email.sendVerificationEmail(findUser.email, token);
   }
 }

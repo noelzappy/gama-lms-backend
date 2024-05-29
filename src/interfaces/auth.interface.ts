@@ -10,7 +10,15 @@ export interface DataStoredInToken {
 
 export interface TokenData {
   token: string;
-  expiresIn: number;
+  expires: number;
+  user: string;
+  blacklisted: boolean;
+  type: TokenType;
+}
+
+export interface TokenObj {
+  token: string;
+  expires: Date;
 }
 
 export interface RequestWithUser extends Request {

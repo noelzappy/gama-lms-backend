@@ -3,6 +3,7 @@ import { Service } from 'typedi';
 import { HttpException } from '@exceptions/httpException';
 import { User } from '@interfaces/users.interface';
 import { UserModel } from '@models/users.model';
+import httpStatus from 'http-status';
 
 @Service()
 export class UserService {
@@ -31,7 +32,7 @@ export class UserService {
   public async updateUser(userId: string, userData: User): Promise<User> {
     if (userData.email) {
       const findUser: User = await UserModel.findOne({ email: userData.email });
-      if (findUser && findUser._id != userId) throw new HttpException(409, `This email ${userData.email} already exists`);
+      if (findUser && findUser.id != userId) throw new HttpException(409, `This email ${userData.email} already exists`);
     }
 
     if (userData.password) {
@@ -50,5 +51,11 @@ export class UserService {
     if (!deleteUserById) throw new HttpException(409, "User doesn't exist");
 
     return deleteUserById;
+  }
+
+  public async findUserByEmail(email: string): Promise<User> {
+    const findUser: User = await UserModel.findOne({ email: email });
+    if (!findUser) throw new HttpException(httpStatus.NOT_FOUND, "User doesn't exist");
+    return findUser;
   }
 }

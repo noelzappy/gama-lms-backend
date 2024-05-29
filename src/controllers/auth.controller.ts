@@ -1,44 +1,71 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { Container } from 'typedi';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
 import { AuthService } from '@services/auth.service';
+import EmailService from '@/services/email.service';
+import { TokenService } from '@/services/token.service';
+import catchAsync from '@/utils/catchAsync';
+import { ForgotPasswordDto, LoginUserDto, LogoutUserDto, RegisterUserDto, ResetPasswordDto, VerifyEmailDto } from '@/dtos/users.dto';
+import httpStatus from 'http-status';
 
 export class AuthController {
   public auth = Container.get(AuthService);
+  public email = Container.get(EmailService);
+  public token = Container.get(TokenService);
 
-  public signUp = async (req: Request, res: Response, next: NextFunction) => {
+  public signUp = catchAsync(async (req: Request, res: Response) => {
+    const userData: RegisterUserDto = req.body;
+    const signupData = await this.auth.signup(userData);
+    const verifyEmailToken = await this.token.generateVerifyEmailToken(signupData.user);
+    this.email.sendVerificationEmail(signupData.user.email, verifyEmailToken);
+    res.status(httpStatus.CREATED).send(signupData);
+  });
+
+  public logIn = catchAsync(async (req: Request, res: Response) => {
+    const userData: LoginUserDto = req.body;
+    const loginData = await this.auth.login(userData);
+    res.status(httpStatus.OK).send(loginData);
+  });
+
+  public logOut = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const userData: User = req.user;
+    const body: LogoutUserDto = req.body;
+    await this.auth.logout(userData, body.refreshToken);
+    res.sendStatus(httpStatus.NO_CONTENT);
+  });
+
+  public refreshAuth = catchAsync(async (req: Request, res: Response) => {
+    const body: LogoutUserDto = req.body;
+    const tokenData = await this.auth.refreshAuth(body.refreshToken);
+    res.status(httpStatus.OK).send(tokenData);
+  });
+
+  public resetPassword = catchAsync(async (req: Request, res: Response) => {
+    const body: ResetPasswordDto = req.body;
+    await this.auth.resetPassword(body.token, body.password);
+    res.sendStatus(httpStatus.NO_CONTENT);
+  });
+
+  public verifyEmail = catchAsync(async (req: Request, res: Response) => {
     try {
-      const userData: User = req.body;
-      const signUpUserData: User = await this.auth.signup(userData);
-
-      res.status(201).json({ data: signUpUserData, message: 'signup' });
+      const body: VerifyEmailDto = req.body;
+      await this.auth.verifyEmail(body.token);
+      res.sendStatus(httpStatus.NO_CONTENT);
     } catch (error) {
-      next(error);
+      throw new Error('Email verification failed');
     }
-  };
+  });
 
-  public logIn = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userData: User = req.body;
-      const { cookie, findUser } = await this.auth.login(userData);
+  public forgotPassword = catchAsync(async (req: Request, res: Response) => {
+    const body: ForgotPasswordDto = req.body;
+    await this.auth.forgotPassword(body.email);
+    res.sendStatus(httpStatus.NO_CONTENT);
+  });
 
-      res.setHeader('Set-Cookie', [cookie]);
-      res.status(200).json({ data: findUser, message: 'login' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public logOut = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    try {
-      const userData: User = req.user;
-      const logOutUserData: User = await this.auth.logout(userData);
-
-      res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
-      res.status(200).json({ data: logOutUserData, message: 'logout' });
-    } catch (error) {
-      next(error);
-    }
-  };
+  public sendEmailVerification = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const body: ForgotPasswordDto = req.body;
+    await this.auth.resendVerificationEmail(body.email);
+    res.sendStatus(httpStatus.NO_CONTENT);
+  });
 }

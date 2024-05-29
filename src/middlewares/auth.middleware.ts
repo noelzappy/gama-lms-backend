@@ -8,7 +8,7 @@ import { ROLE_RIGHTS } from '@/config/roles';
 
 const AUTH_ERR_MSG = 'Please authenticate';
 
-const verifyCallback = (req: RequestWithUser, resolve, reject, requiredRights: string[]) => async (err, user: User, info) => {
+const verifyCallback = (req: RequestWithUser, resolve, reject, requiredRights?: string[]) => async (err, user: User, info) => {
   if (err || info || !user) {
     return reject(new HttpException(httpStatus.UNAUTHORIZED, AUTH_ERR_MSG));
   }
@@ -29,7 +29,7 @@ const verifyCallback = (req: RequestWithUser, resolve, reject, requiredRights: s
   resolve();
 };
 
-export const AuthMiddleware = (requiredRights: string[]) => async (req: RequestWithUser, res: Response, next: NextFunction) => {
+export const AuthMiddleware = (requiredRights?: string[]) => async (req: RequestWithUser, res: Response, next: NextFunction) => {
   return new Promise((resolve, reject) => {
     passport.authenticate('jwt', { session: false }, verifyCallback(req, resolve, reject, requiredRights))(req, res, next);
   })
