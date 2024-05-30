@@ -2,7 +2,7 @@
 FROM node:16.18-buster-slim
 
 # Copy Dir
-COPY . ./app
+COPY . /app
 
 # Work to Dir
 WORKDIR /app
@@ -12,8 +12,6 @@ RUN npm install --legacy-peer-deps
 
 # Set Env
 ENV NODE_ENV production
-
-EXPOSE 3000
 
 # Cmd script
 CMD ["npm", "run", "start"]

@@ -1,14 +1,20 @@
-version: "3.9"
-
 services:
-
-  server:
-    container_name: server
+  api:
     build:
       context: .
-      dockerfile: Dockerfile.prod
-    restart: "unless-stopped"
-    command: npm install && npm run start
+      dockerfile: Dockerfile
+    ports:
+      - "3000"
     environment:
-      - NODE_ENV=production
-
+      - PORT=3000
+      - NODE_ENV=development
+      - MONGO_URL=${MONGO_URL}
+      - SECRET=${SECRET}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+      - CLIENT_URL=${CLIENT_URL}
+      - LOG_FORMAT=${LOG_FORMAT}
+      - LOG_DIR=${LOG_DIR}
