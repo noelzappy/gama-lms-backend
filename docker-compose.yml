@@ -5,8 +5,10 @@ services:
   server:
     container_name: server
     build:
-      context: ./
+      context: .
       dockerfile: Dockerfile.prod
     restart: "unless-stopped"
+    command: npm run start
     environment:
       - NODE_ENV=production
+
