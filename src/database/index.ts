@@ -11,5 +11,5 @@ export const dbConnection = async () => {
     set('debug', true);
   }
 
-  await connect(dbConfig.url, dbConfig.options);
+  await connect(dbConfig.url);
 };
