@@ -14,7 +14,7 @@ services:
     container_name: server
     build:
       context: ./
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
 
     volumes:
       - ./:/app
