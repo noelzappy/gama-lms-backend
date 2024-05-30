@@ -1,20 +1,45 @@
+version: "3.9"
+
 services:
-  api:
+
+  server:
+    container_name: server
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: Dockerfile.dev
     ports:
-      - "3000"
+      - "3000:3000"
     environment:
-      - PORT=3000
-      - NODE_ENV=development
-      - MONGO_URL=${MONGO_URL}
-      - SECRET=${SECRET}
-      - MAIL_HOST=${MAIL_HOST}
-      - MAIL_PORT=${MAIL_PORT}
-      - MAIL_USER=${MAIL_USER}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
-      - MAIL_FROM=${MAIL_FROM}
-      - CLIENT_URL=${CLIENT_URL}
-      - LOG_FORMAT=${LOG_FORMAT}
-      - LOG_DIR=${LOG_DIR}
+      DB_HOST: localhost
+      DB_PORT: 27017
+      DB_DATABASE: dev
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    restart: "unless-stopped"
+    networks:
+      - backend
+    links:
+      - mongo
+    depends_on:
+      - mongo
+
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      DB_HOST: localhost
+      DB_PORT: 27017
+      DB_DATABASE: dev
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local
