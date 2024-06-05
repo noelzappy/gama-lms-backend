@@ -27,9 +27,23 @@ export class CreateUserDto {
 export class UpdateUserDto {
   @IsString()
   @IsNotEmpty()
-  @MinLength(9)
-  @MaxLength(32)
-  public password: string;
+  @IsOptional()
+  public firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  public lastName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  public country: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  public phoneNumber: string;
 }
 
 export class LoginUserDto {
@@ -58,6 +72,10 @@ export class RegisterUserDto {
   @IsString()
   @IsNotEmpty()
   public lastName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  public phoneNumber: string;
 
   @IsString()
   @IsOptional()
