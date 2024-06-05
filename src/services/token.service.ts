@@ -1,7 +1,7 @@
 import { sign, verify } from 'jsonwebtoken';
 import Container, { Service } from 'typedi';
 import { SECRET_KEY } from '@config';
-import { HttpException } from '@exceptions/httpException';
+import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, TokenObj, TokenType } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
 import { TokenModel } from '@/models/token.model';

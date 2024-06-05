@@ -19,3 +19,4 @@ EXPOSE 4001
 
 # Cmd script
 CMD ["npm", "run", "start"]
+
