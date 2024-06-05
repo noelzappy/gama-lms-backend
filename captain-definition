@@ -4,7 +4,6 @@
     "FROM node:18-alpine",
     "RUN mkdir -p /usr/src/app",
     "WORKDIR /usr/src/app",
-    "ADD https://www.google.com /time.now",
     "COPY ./ /usr/src/app",
     "RUN npm install && npm cache clean --force && npm run build",
     "ENV NODE_ENV production",
