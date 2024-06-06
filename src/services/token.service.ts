@@ -3,10 +3,10 @@ import Container, { Service } from 'typedi';
 import { SECRET_KEY } from '@config';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, TokenObj, TokenType } from '@interfaces/auth.interface';
-import { User } from '@interfaces/users.interface';
 import { TokenModel } from '@/models/token.model';
 import httpStatus from 'http-status';
 import { UserService } from './users.service';
+import { UserDocument } from '@/interfaces/users.interface';
 
 @Service()
 export class TokenService {
@@ -45,7 +45,7 @@ export class TokenService {
     return tokenData;
   }
 
-  public async generateAuthTokens(user: User): Promise<{
+  public async generateAuthTokens(user: UserDocument): Promise<{
     access: TokenObj;
     refresh: TokenObj;
   }> {
@@ -91,7 +91,7 @@ export class TokenService {
     return token;
   }
 
-  public async generateVerifyEmailToken(user: User): Promise<string> {
+  public async generateVerifyEmailToken(user: UserDocument): Promise<string> {
     const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
     const token = this.generateToken({
       userId: user.id,

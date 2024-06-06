@@ -2,13 +2,13 @@ import { hash, compare } from 'bcrypt';
 import Container, { Service } from 'typedi';
 import { HttpException } from '@exceptions/HttpException';
 import { TokenObj, TokenType } from '@interfaces/auth.interface';
-import { User } from '@interfaces/users.interface';
 import { UserModel } from '@models/users.model';
 import httpStatus from 'http-status';
 import { TokenService } from './token.service';
 import { LoginUserDto, RegisterUserDto } from '@/dtos/users.dto';
 import { TokenModel } from '@/models/token.model';
 import EmailService from './email.service';
+import { UserDocument } from '@/interfaces/users.interface';
 
 @Service()
 export class AuthService {
@@ -20,14 +20,14 @@ export class AuthService {
       access: TokenObj;
       refresh: TokenObj;
     };
-    user: User;
+    user: UserDocument;
   }> {
-    const findUser: User = await UserModel.findOne({ where: { email: userData.email } });
+    const findUser = await UserModel.findOne({ where: { email: userData.email } });
     if (findUser) throw new HttpException(httpStatus.BAD_REQUEST, 'Email already taken');
 
     const hashedPassword = await hash(userData.password, 10);
 
-    const createUserData: User = await UserModel.create({ ...userData, password: hashedPassword });
+    const createUserData = await UserModel.create({ ...userData, password: hashedPassword });
 
     const tokenData = await this.Token.generateAuthTokens(createUserData);
 
@@ -39,9 +39,9 @@ export class AuthService {
       access: TokenObj;
       refresh: TokenObj;
     };
-    user: User;
+    user: UserDocument;
   }> {
-    const findUser: User = await UserModel.findOne({ where: { email: userData.email } });
+    const findUser = await UserModel.findOne({ where: { email: userData.email } });
     if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
 
     const isPasswordMatching: boolean = await compare(userData.password, findUser.password);
@@ -53,8 +53,8 @@ export class AuthService {
     return { tokenData, user: findUser };
   }
 
-  public async logout(userData: User, refreshToken: string): Promise<void> {
-    await TokenModel.remove({ where: { token: refreshToken, type: TokenType.REFRESH, userId: userData.id } });
+  public async logout(userId: string, refreshToken: string): Promise<void> {
+    await TokenModel.remove({ where: { token: refreshToken, type: TokenType.REFRESH, userId } });
   }
 
   public async refreshAuth(refreshToken: string): Promise<{
@@ -65,7 +65,7 @@ export class AuthService {
 
     if (!verifiedToken) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid token');
 
-    const findUser: User = await UserModel.findById(verifiedToken.user);
+    const findUser = await UserModel.findById(verifiedToken.user);
 
     if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid token');
 
@@ -113,7 +113,7 @@ export class AuthService {
   }
 
   public async resendVerificationEmail(email: string): Promise<void> {
-    const findUser: User = await UserModel.findOne({ where: { email } });
+    const findUser = await UserModel.findOne({ where: { email } });
 
     if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid email');
 

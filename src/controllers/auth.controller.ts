@@ -30,7 +30,7 @@ export class AuthController {
   public logOut = catchAsync(async (req: RequestWithUser, res: Response) => {
     const userData = req.user;
     const body: LogoutUserDto = req.body;
-    await this.auth.logout(userData, body.refreshToken);
+    await this.auth.logout(userData.id, body.refreshToken);
     res.sendStatus(httpStatus.NO_CONTENT);
   });
 
