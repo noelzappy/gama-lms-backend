@@ -22,7 +22,10 @@ export class AuthService {
     };
     user: UserDocument;
   }> {
-    const findUser = await UserModel.findOne({ where: { email: userData.email } });
+    const findUser = await UserModel.findOne({ email: userData.email });
+
+    console.log('DDD', findUser, userData);
+
     if (findUser) throw new HttpException(httpStatus.BAD_REQUEST, 'Email already taken');
 
     const hashedPassword = await hash(userData.password, 10);
@@ -41,7 +44,7 @@ export class AuthService {
     };
     user: UserDocument;
   }> {
-    const findUser = await UserModel.findOne({ where: { email: userData.email } });
+    const findUser = await UserModel.findOne({ email: userData.email });
     if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
 
     const isPasswordMatching: boolean = await compare(userData.password, findUser.password);
@@ -104,7 +107,7 @@ export class AuthService {
   }
 
   public async forgotPassword(email: string): Promise<void> {
-    const findUser = await UserModel.findOne({ where: { email } });
+    const findUser = await UserModel.findOne({ email });
 
     if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid email');
 
@@ -113,7 +116,7 @@ export class AuthService {
   }
 
   public async resendVerificationEmail(email: string): Promise<void> {
-    const findUser = await UserModel.findOne({ where: { email } });
+    const findUser = await UserModel.findOne({ email });
 
     if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid email');
 
