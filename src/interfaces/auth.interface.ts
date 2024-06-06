@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { User } from '@interfaces/users.interface';
+import { UserDocument } from './users.interface';
 
 export interface DataStoredInToken {
   sub: string;
@@ -22,7 +22,7 @@ export interface TokenObj {
 }
 
 export interface RequestWithUser extends Request {
-  user: User;
+  user: UserDocument;
 }
 
 export enum TokenType {

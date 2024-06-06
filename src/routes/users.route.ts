@@ -16,6 +16,6 @@ export class UserRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}/me`, AuthMiddleware(), this.user.getMe);
-    this.router.put('/users/me', AuthMiddleware(), ValidationMiddleware(UpdateUserDto, true), this.user.updateUser);
+    this.router.patch('/users/me', AuthMiddleware(), ValidationMiddleware(UpdateUserDto, 'body', true), this.user.updateUser);
   }
 }

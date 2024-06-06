@@ -1,14 +1,19 @@
-import { model, Schema, Document } from 'mongoose';
-import { User } from '@interfaces/users.interface';
+import { model, Schema, Model } from 'mongoose';
 import toJSON from './plugins/toJSON.plugin';
-import paginate from './plugins/paginate.plugin';
 import { Role } from '@/config/roles';
+import { paginate, PaginateOptions, PaginateResult } from './plugins/paginate.plugin';
+import { UserDocument } from '@/interfaces/users.interface';
 
-const UserSchema = new Schema({
+interface UserModel extends Model<UserDocument> {
+  paginate(filter: Record<string, any>, options: PaginateOptions): Promise<PaginateResult<UserDocument>>;
+}
+
+const UserSchema = new Schema<UserDocument>({
   email: {
     type: String,
     required: true,
     unique: true,
+    trim: true,
   },
   password: {
     type: String,
@@ -46,4 +51,4 @@ const UserSchema = new Schema({
 UserSchema.plugin(toJSON);
 UserSchema.plugin(paginate);
 
-export const UserModel = model<User & Document>('User', UserSchema);
+export const UserModel = model<UserDocument, UserModel>('User', UserSchema);

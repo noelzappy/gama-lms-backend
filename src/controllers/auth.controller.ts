@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { Container } from 'typedi';
 import { RequestWithUser } from '@interfaces/auth.interface';
-import { User } from '@interfaces/users.interface';
 import { AuthService } from '@services/auth.service';
 import EmailService from '@/services/email.service';
 import { TokenService } from '@/services/token.service';
@@ -29,7 +28,7 @@ export class AuthController {
   });
 
   public logOut = catchAsync(async (req: RequestWithUser, res: Response) => {
-    const userData: User = req.user;
+    const userData = req.user;
     const body: LogoutUserDto = req.body;
     await this.auth.logout(userData, body.refreshToken);
     res.sendStatus(httpStatus.NO_CONTENT);
