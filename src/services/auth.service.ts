@@ -86,7 +86,7 @@ export class AuthService {
 
     if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid token');
 
-    Object.assign(findUser, { isEmailVerified: true });
+    findUser.set('isEmailVerified', true);
 
     await TokenModel.deleteMany({ user: findUser.id, type: TokenType.VERIFY_EMAIL });
     await findUser.save();
