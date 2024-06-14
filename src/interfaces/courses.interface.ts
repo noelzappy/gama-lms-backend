@@ -7,6 +7,12 @@ export enum CourseStatus {
   DRAFT = 'draft',
 }
 
+export enum CourseProgress {
+  IN_PROGRESS = 'inProgress',
+  COMPLETED = 'completed',
+  NOT_STARTED = 'notStarted',
+}
+
 export interface CourseDocument extends Document {
   id: string;
   name: string;
@@ -20,4 +26,24 @@ export interface CourseDocument extends Document {
   date: Date;
   status: CourseStatus;
   tags: string;
+}
+
+export interface CourseChapterDocument extends Document {
+  id: string;
+  name: string;
+  course: Schema.Types.ObjectId;
+  description: string;
+  duration: string;
+  order: number;
+}
+
+export interface CourseLessonDocument extends Document {
+  id: string;
+  name: string;
+  chapter: Schema.Types.ObjectId;
+  description?: string;
+  duration: string;
+  media: Schema.Types.ObjectId;
+  content?: string;
+  order: number;
 }
