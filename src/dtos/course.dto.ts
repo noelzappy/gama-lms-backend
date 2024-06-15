@@ -1,6 +1,7 @@
 import { CourseStatus } from '@/interfaces/courses.interface';
 import { IsString, IsNotEmpty, IsOptional, IsEnum, IsInt } from 'class-validator';
 import { PaginatedQueryParam } from './misc.dto';
+import { Schema } from 'mongoose';
 
 export class CreateCourseDto {
   @IsString()
@@ -22,7 +23,7 @@ export class CreateCourseDto {
 
   @IsString()
   @IsNotEmpty()
-  public image: string;
+  public image: Schema.Types.ObjectId;
 
   @IsNotEmpty()
   @IsInt()
@@ -69,7 +70,7 @@ export class UpdateCourseDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  public image: string;
+  public image: Schema.Types.ObjectId;
 
   @IsNotEmpty()
   @IsInt()
@@ -169,8 +170,8 @@ export class CreateCourseLessonDto {
   public name: string;
 
   @IsString()
-  @IsNotEmpty()
-  public chapter: string;
+  @IsOptional()
+  public chapter: Schema.Types.ObjectId;
 
   @IsString()
   @IsOptional()
@@ -182,7 +183,7 @@ export class CreateCourseLessonDto {
 
   @IsString()
   @IsNotEmpty()
-  public media: string;
+  public media: Schema.Types.ObjectId;
 
   @IsString()
   @IsOptional()
@@ -234,8 +235,8 @@ export class QueryCourseChapters extends PaginatedQueryParam {
   public name?: string;
 
   @IsString()
-  @IsOptional()
-  public course?: string;
+  @IsNotEmpty()
+  public course: string;
 
   @IsInt()
   @IsOptional()

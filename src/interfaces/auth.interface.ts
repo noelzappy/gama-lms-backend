@@ -25,6 +25,10 @@ export interface RequestWithUser extends Request {
   user: UserDocument;
 }
 
+export interface RequestWithUserAndFile extends RequestWithUser {
+  file: any;
+}
+
 export enum TokenType {
   ACCESS = 'access',
   REFRESH = 'refresh',

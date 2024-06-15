@@ -19,7 +19,7 @@ export class CourseService {
   }
 
   public async getCourseById(courseId: string): Promise<CourseDocument> {
-    const course = await CourseModel.findById(courseId);
+    const course = await CourseModel.findById(courseId).populate('author image');
     if (!course) throw new HttpException(httpStatus.NOT_FOUND, 'Course not found');
     return course;
   }

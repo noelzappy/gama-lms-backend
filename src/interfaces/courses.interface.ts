@@ -18,7 +18,7 @@ export interface CourseDocument extends Document {
   name: string;
   description: string;
   author: Schema.Types.ObjectId;
-  image: string;
+  image: Schema.Types.ObjectId;
   price: number;
   rating?: number;
   numberOfStudents?: number;

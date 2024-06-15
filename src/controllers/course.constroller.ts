@@ -3,9 +3,9 @@ import { Container } from 'typedi';
 import catchAsync from '@/utils/catchAsync';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import httpStatus from 'http-status';
-import { CreateCourseChapterDto, CreateCourseDto, UpdateCourseDto } from '@/dtos/course.dto';
-import { CourseService } from '@/services/courses.service';
 import pick from '@/utils/pick';
+import { CreateCourseChapterDto, CreateCourseDto, CreateCourseLessonDto, UpdateCourseDto, UpdateCourseLessonDto } from '@/dtos/course.dto';
+import { CourseService } from '@/services/courses.service';
 import { CourseChapterService } from '@/services/courseChapter.service';
 import { CourseLessonService } from '@/services/courseLesson.service';
 
@@ -28,7 +28,7 @@ export class CourseController {
   public queryCourses = catchAsync(async (req: RequestWithUser, res: Response) => {
     const filter = pick(req.query, ['name', 'author']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    options.populate = 'author';
+    options.populate = 'author image';
 
     const courses = await this.course.queryCourses(filter, options);
 
@@ -61,19 +61,15 @@ export class CourseController {
   });
 
   public createCourseChapter = catchAsync(async (req: RequestWithUser, res: Response) => {
-    const courseId: string = req.params.courseId;
     const chapterData: CreateCourseChapterDto = req.body;
 
-    const newChapter = await this.chapters.createCourseChapter({ ...chapterData, course: courseId });
+    const newChapter = await this.chapters.createCourseChapter(chapterData);
 
     res.status(httpStatus.CREATED).json(newChapter);
   });
 
   public queryCourseChapters = catchAsync(async (req: RequestWithUser, res: Response) => {
-    const courseId: string = req.params.courseId;
-
-    const filter = pick(req.query, ['name']);
-    filter.course = courseId;
+    const filter = pick(req.query, ['name', 'course']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
     const chapters = await this.chapters.queryCourseChapters(filter, options);
@@ -83,9 +79,7 @@ export class CourseController {
 
   public getCourseChapterById = catchAsync(async (req: RequestWithUser, res: Response) => {
     const chapterId: string = req.params.chapterId;
-
     const chapter = await this.chapters.findCourseChapterById(chapterId);
-
     res.status(httpStatus.OK).json(chapter);
   });
 
@@ -96,5 +90,43 @@ export class CourseController {
     const updateChapter = await this.chapters.updateCourseChapter(chapterId, chapterData);
 
     res.status(httpStatus.OK).json(updateChapter);
+  });
+
+  public queryCourseLessons = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const chapterId: string = req.params.chapterId;
+
+    const filter = pick(req.query, ['name']);
+    filter.chapter = chapterId;
+
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+    const lessons = await this.lesson.queryCourseLessons(filter, options);
+
+    res.status(httpStatus.OK).json(lessons);
+  });
+
+  public createCourseLesson = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const lessonData: CreateCourseLessonDto = { ...req.body, chapter: req.params.chapterId };
+    const newLesson = await this.lesson.createCourseLesson(lessonData);
+    res.status(httpStatus.CREATED).json(newLesson);
+  });
+
+  public getCourseLessonById = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const lessonId: string = req.params.lessonId;
+    const lesson = await this.lesson.findCourseLessonById(lessonId);
+    res.status(httpStatus.OK).json(lesson);
+  });
+
+  public updateCourseLesson = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const lessonId: string = req.params.lessonId;
+    const lessonData: UpdateCourseLessonDto = req.body;
+    const updateLesson = await this.lesson.updateCourseLesson(lessonId, lessonData);
+    res.status(httpStatus.OK).json(updateLesson);
+  });
+
+  public deleteCourseLesson = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const lessonId: string = req.params.lessonId;
+    const deleteLesson = await this.lesson.deleteCourseLesson(lessonId);
+    res.status(httpStatus.OK).json(deleteLesson);
   });
 }

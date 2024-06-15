@@ -21,7 +21,7 @@ export class CourseChapterService {
   }
 
   public async createCourseChapter(courseChapterData: CreateCourseChapterDto): Promise<CourseChapterDocument> {
-    const findCourseChapter = await CourseChapterModel.findOne({ name: courseChapterData.name });
+    const findCourseChapter = await CourseChapterModel.findOne({ name: courseChapterData.name, course: courseChapterData.course });
     if (findCourseChapter) throw new HttpException(httpStatus.CONFLICT, `This name ${courseChapterData.name} already exists`);
 
     const createCourseChapterData = await CourseChapterModel.create({ ...courseChapterData });
