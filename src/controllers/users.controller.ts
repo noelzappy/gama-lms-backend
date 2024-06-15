@@ -23,6 +23,6 @@ export class UserController {
 
     const user = await this.user.findUserById(userId);
 
-    res.status(httpStatus.FOUND).json(user);
+    res.status(httpStatus.OK).json(user);
   });
 }
