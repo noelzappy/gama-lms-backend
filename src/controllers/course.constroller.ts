@@ -72,6 +72,10 @@ export class CourseController {
     const filter = pick(req.query, ['name', 'course']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
+    if (filter.course) {
+      throw new Error('Course ID is required');
+    }
+
     const chapters = await this.chapters.queryCourseChapters(filter, options);
 
     res.status(httpStatus.OK).json(chapters);
