@@ -38,7 +38,7 @@ export class CourseRoute implements Routes {
 
     this.router.patch(
       '/courses/chapters/:chapterId',
-      AuthMiddleware(),
+      AuthMiddleware('manageCourses'),
       ValidationMiddleware(UpdateCourseChapterDto),
       this.course.updateCourseChapter,
     );
@@ -47,14 +47,14 @@ export class CourseRoute implements Routes {
 
     this.router.post(
       '/courses/chapters/:chapterId/lessons',
-      AuthMiddleware(),
+      AuthMiddleware('manageCourses'),
       ValidationMiddleware(CreateCourseLessonDto),
       this.course.createCourseLesson,
     );
 
     this.router.patch(
       '/courses/chapters/:chapterId/lessons/:lessonId',
-      AuthMiddleware(),
+      AuthMiddleware('manageCourses'),
       ValidationMiddleware(UpdateCourseLessonDto, 'body', true),
       this.course.updateCourseLesson,
     );
