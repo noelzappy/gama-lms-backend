@@ -1,9 +1,9 @@
 import { Service } from 'typedi';
 import { HttpException } from '@exceptions/HttpException';
 import httpStatus from 'http-status';
+import { PaginateResult } from '@/models/plugins/paginate.plugin';
 import { CourseDocument } from '@/interfaces/courses.interface';
 import { CourseModel } from '@/models/course.model';
-import { PaginateResult } from '@/models/plugins/paginate.plugin';
 import { CreateCourseDto, UpdateCourseDto } from '@/dtos/course.dto';
 
 @Service()

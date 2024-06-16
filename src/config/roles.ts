@@ -7,7 +7,7 @@ export enum Role {
 const ALL_ROLES = {
   [Role.STUDENT]: ['auth'],
   [Role.INSTRUCTOR]: ['auth', 'manageCourses', 'manageMedia'],
-  [Role.ADMIN]: ['auth', 'manageCourses', 'manageUsers', 'manageMedia'],
+  [Role.ADMIN]: ['auth', 'manageCourses', 'manageUsers', 'manageMedia', 'manageCategories'],
 } as const;
 
 const ROLES = Object.keys(ALL_ROLES);

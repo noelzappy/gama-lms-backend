@@ -256,3 +256,39 @@ export class QueryCourseLessons extends PaginatedQueryParam {
   @IsOptional()
   public order?: number;
 }
+
+export class CreateCourseCategoryDto {
+  @IsString()
+  @IsNotEmpty()
+  public name: string;
+
+  @IsString()
+  @IsOptional()
+  public description?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  public image: Schema.Types.ObjectId;
+}
+
+export class UpdateCourseCategoryDto {
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  public name: string;
+
+  @IsString()
+  @IsOptional()
+  public description?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  public image?: Schema.Types.ObjectId;
+}
+
+export class QueryCourseCategories extends PaginatedQueryParam {
+  @IsString()
+  @IsOptional()
+  public name?: string;
+}

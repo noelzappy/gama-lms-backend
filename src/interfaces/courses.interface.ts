@@ -47,3 +47,10 @@ export interface CourseLessonDocument extends Document {
   content?: string;
   order: number;
 }
+
+export interface CourseCategoryDocument extends Document {
+  id: string;
+  name: string;
+  description?: string;
+  image: Schema.Types.ObjectId;
+}
