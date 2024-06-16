@@ -59,6 +59,8 @@ export class CourseRoute implements Routes {
       this.course.updateCourseLesson,
     );
 
+    this.router.get('/courses/my', AuthMiddleware('manageCourses'), ValidationMiddleware(QueryCourses, 'query', true), this.course.getMyCourses);
+
     this.router.get('/courses/:id', AuthMiddleware(), this.course.getCourseById);
     this.router.patch('/courses/:id', AuthMiddleware('manageCourses'), ValidationMiddleware(UpdateCourseDto), this.course.updateCourse);
     this.router.get('/courses/author/:authorId', AuthMiddleware(), this.course.getCourseByAuthor);

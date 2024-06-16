@@ -133,4 +133,17 @@ export class CourseController {
     const deleteLesson = await this.lesson.deleteCourseLesson(lessonId);
     res.status(httpStatus.OK).json(deleteLesson);
   });
+
+  public getMyCourses = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const authorId: string = req.user.id;
+
+    const filter = pick(req.query, ['name']);
+    filter.author = authorId;
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    options.populate = 'author image';
+
+    const courses = await this.course.queryCourses(filter, options);
+
+    res.status(httpStatus.OK).json(courses);
+  });
 }
