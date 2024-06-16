@@ -19,7 +19,7 @@ export class CourseService {
   }
 
   public async getCourseById(courseId: string): Promise<CourseDocument> {
-    const course = await CourseModel.findById(courseId).populate('author image');
+    const course = await CourseModel.findById(courseId).populate('author image category');
     if (!course) throw new HttpException(httpStatus.NOT_FOUND, 'Course not found');
     return course;
   }
@@ -34,7 +34,7 @@ export class CourseService {
   }
 
   public async getCourseByAuthor(authorId: string): Promise<CourseDocument[]> {
-    const courses = await CourseModel.find({ author: authorId });
+    const courses = await CourseModel.find({ author: authorId }).populate('author image category');
     return courses;
   }
 }

@@ -26,6 +26,7 @@ export interface CourseDocument extends Document {
   date: Date;
   status: CourseStatus;
   tags: string;
+  category: Schema.Types.ObjectId;
 }
 
 export interface CourseChapterDocument extends Document {

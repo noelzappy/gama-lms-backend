@@ -59,6 +59,11 @@ const CourseSchema = new Schema<CourseDocument>(
       type: String,
       default: '',
     },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: 'CourseCategory',
+      required: true,
+    },
   },
   { timestamps: true },
 );

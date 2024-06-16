@@ -28,7 +28,7 @@ export class CourseController {
   public queryCourses = catchAsync(async (req: RequestWithUser, res: Response) => {
     const filter = pick(req.query, ['name', 'author']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    options.populate = 'author image';
+    options.populate = 'author image category';
 
     const courses = await this.course.queryCourses(filter, options);
 
@@ -140,7 +140,7 @@ export class CourseController {
     const filter = pick(req.query, ['name']);
     filter.author = authorId;
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
-    options.populate = 'author image';
+    options.populate = 'author image category';
 
     const courses = await this.course.queryCourses(filter, options);
 
