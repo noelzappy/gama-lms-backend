@@ -13,6 +13,11 @@ export class MediaController {
   public createMedia = catchAsync(async (req: RequestWithUserAndFile, res: Response) => {
     console.log(JSON.stringify(req.file, null, 2));
 
+    if (!req.file) {
+      res.status(httpStatus.BAD_REQUEST).json({ message: 'File is required' });
+      return;
+    }
+
     const mediaData: CreateMediaDto = {
       createdBy: req.user.id,
       url: req.file.location,

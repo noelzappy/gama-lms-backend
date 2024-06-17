@@ -2,17 +2,15 @@ import multer from 'multer';
 import crypto from 'crypto';
 import { S3Client } from '@aws-sdk/client-s3';
 import multerS3 from 'multer-s3';
-import aws from 'aws-sdk';
 import { S3_ACCESS_KEY, S3_BUCKET, S3_ENDPOINT, S3_REGION, S3_SECRET_KEY } from '@/config';
 
-const spacesEndpoint = new aws.Endpoint(S3_ENDPOINT);
-
 const s3 = new S3Client({
-  endpoint: spacesEndpoint as any,
+  endpoint: S3_ENDPOINT,
   credentials: {
     accessKeyId: S3_ACCESS_KEY,
     secretAccessKey: S3_SECRET_KEY,
   },
+  forcePathStyle: true,
   region: S3_REGION,
 });
 

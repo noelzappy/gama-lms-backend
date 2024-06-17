@@ -50,17 +50,17 @@ export class UpdateCourseDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  public name: string;
+  public name?: string;
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  public description: string;
+  public description?: string;
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  public author: string;
+  public author?: string;
 
   @IsString()
   @IsNotEmpty()
