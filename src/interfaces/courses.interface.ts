@@ -55,3 +55,19 @@ export interface CourseCategoryDocument extends Document {
   description?: string;
   image: Schema.Types.ObjectId;
 }
+
+export enum CoursePurchaseStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}
+
+export interface CoursePurchaseDocument extends Document {
+  id?: Schema.Types.ObjectId;
+  course: Schema.Types.ObjectId;
+  user: Schema.Types.ObjectId;
+  status: CoursePurchaseStatus;
+  date: Date;
+  payment: Schema.Types.ObjectId;
+  completedAt?: Date;
+}

@@ -4,6 +4,7 @@ import { AuthMiddleware } from '@middlewares/auth.middleware';
 import { ValidationMiddleware } from '@middlewares/validation.middleware';
 import { CourseController } from '@/controllers/course.constroller';
 import {
+  BuyCourseDto,
   CreateCourseChapterDto,
   CreateCourseDto,
   CreateCourseLessonDto,
@@ -25,6 +26,8 @@ export class CourseRoute implements Routes {
   private initializeRoutes() {
     this.router.post('/courses', AuthMiddleware('manageCourses'), ValidationMiddleware(CreateCourseDto), this.course.createCourse);
     this.router.get('/courses', AuthMiddleware(), ValidationMiddleware(QueryCourses, 'query', true), this.course.queryCourses);
+
+    this.router.get('/courses/buy', AuthMiddleware(), ValidationMiddleware(BuyCourseDto), this.course.buyCourse);
 
     this.router.get('/courses/chapters', AuthMiddleware(), ValidationMiddleware(QueryCourseChapters, 'query', true), this.course.queryCourseChapters);
     this.router.post(

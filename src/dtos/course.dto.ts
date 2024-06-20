@@ -292,3 +292,9 @@ export class QueryCourseCategories extends PaginatedQueryParam {
   @IsOptional()
   public name?: string;
 }
+
+export class BuyCourseDto {
+  @IsString()
+  @IsNotEmpty()
+  public courseId: Schema.Types.ObjectId;
+}

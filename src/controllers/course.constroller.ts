@@ -4,15 +4,27 @@ import catchAsync from '@/utils/catchAsync';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import httpStatus from 'http-status';
 import pick from '@/utils/pick';
-import { CreateCourseChapterDto, CreateCourseDto, CreateCourseLessonDto, UpdateCourseDto, UpdateCourseLessonDto } from '@/dtos/course.dto';
+import {
+  BuyCourseDto,
+  CreateCourseChapterDto,
+  CreateCourseDto,
+  CreateCourseLessonDto,
+  UpdateCourseDto,
+  UpdateCourseLessonDto,
+} from '@/dtos/course.dto';
 import { CourseService } from '@/services/courses.service';
 import { CourseChapterService } from '@/services/courseChapter.service';
 import { CourseLessonService } from '@/services/courseLesson.service';
+import { PaymentService } from '@/services/payment.service';
+import { convertAmountToPesewas, generatePaymentReference } from '@/utils/misc';
+import { PaymentDocument, PaymentMethod, PaymentStatus } from '@/interfaces/payment.interface';
+import { PAYSTACK_PUBLIC_KEY } from '@/config';
 
 export class CourseController {
   public course = Container.get(CourseService);
   public chapters = Container.get(CourseChapterService);
   public lesson = Container.get(CourseLessonService);
+  public payment = Container.get(PaymentService);
 
   public createCourse = catchAsync(async (req: RequestWithUser, res: Response) => {
     const courseData: CreateCourseDto = {
@@ -72,7 +84,7 @@ export class CourseController {
     const filter = pick(req.query, ['name', 'course']);
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
 
-    if (filter.course) {
+    if (!filter.course) {
       throw new Error('Course ID is required');
     }
 
@@ -145,5 +157,53 @@ export class CourseController {
     const courses = await this.course.queryCourses(filter, options);
 
     res.status(httpStatus.OK).json(courses);
+  });
+
+  public buyCourse = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const { user } = req;
+
+    const buyCourseData: BuyCourseDto = req.body;
+    const course = await this.course.getCourseById(buyCourseData.courseId);
+
+    if (!course) {
+      throw new Error('Course not found');
+    }
+
+    const ref = generatePaymentReference(course.id, req.user.id, course.price);
+
+    const paymentData: Partial<PaymentDocument> = {
+      amount: course.price,
+      status: PaymentStatus.PENDING,
+      createdBy: req.user.id as any,
+      paymentMethod: PaymentMethod.PAYSTACK,
+      paymentRef: ref,
+      amountPaid: 0,
+    };
+
+    const payment = await this.payment.createPayment(paymentData as PaymentDocument);
+
+    const coursePurchaseData = {
+      course: course.id,
+      user: req.user.id,
+      payment: payment.id,
+    };
+
+    const purchase = await this.course.buyCourse(coursePurchaseData as any);
+
+    res.status(httpStatus.OK).json({
+      reference: ref,
+      amount: convertAmountToPesewas(course.price),
+      email: user.email,
+      publicKey: PAYSTACK_PUBLIC_KEY,
+      text: 'Pay Now',
+      metadata: {
+        name: user.firstName + ' ' + user.lastName,
+        courseId: course.id,
+        userId: user.id,
+        paymentId: payment.id,
+        purchaseId: purchase.id,
+      },
+      currency: 'GHS',
+    });
   });
 }
