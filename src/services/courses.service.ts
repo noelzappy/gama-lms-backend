@@ -62,4 +62,16 @@ export class CourseService {
 
     return purchase;
   }
+
+  public async getCoursePurchaseByCourseId(
+    courseId: string | Schema.Types.ObjectId,
+    userId: string | Schema.Types.ObjectId,
+  ): Promise<CoursePurchaseDocument> {
+    const purchase = await CoursePurchaseModel.findOne({
+      course: courseId,
+      status: CoursePurchaseStatus.COMPLETED,
+      user: userId,
+    });
+    return purchase;
+  }
 }

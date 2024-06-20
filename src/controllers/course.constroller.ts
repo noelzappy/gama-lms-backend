@@ -169,6 +169,12 @@ export class CourseController {
       throw new Error('Course not found');
     }
 
+    const alreadyPurchased = await this.course.getCoursePurchaseByCourseId(course.id, user.id);
+
+    if (alreadyPurchased) {
+      throw new Error('You have already purchased this course');
+    }
+
     const ref = generatePaymentReference(course.id, req.user.id, course.price);
 
     const paymentData: Partial<PaymentDocument> = {
