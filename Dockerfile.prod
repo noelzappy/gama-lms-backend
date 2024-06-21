@@ -1,6 +1,9 @@
 # NodeJS Version 16
 FROM node:16.18-buster-slim
 
+ARG CACHEBUST=1
+RUN echo "Cache busting argument: $CACHEBUST"
+
 ARG CACHE_DATE=not_a_date
 
 # Copy Dir
