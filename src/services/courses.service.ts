@@ -30,7 +30,8 @@ export class CourseService {
     const course = await CourseModel.findById(courseId);
     if (!course) throw new HttpException(httpStatus.NOT_FOUND, 'Course not found');
 
-    course.set(courseData);
+    Object.assign(course, courseData);
+
     await course.save();
     return course;
   }
