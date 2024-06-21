@@ -7,3 +7,13 @@ export function generatePaymentReference(courseId: string, userId: string, amoun
 
 export const convertAmountToPesewas = (amount: number) => amount * 100;
 export const convertAmountToCedis = (amount: number) => amount / 100;
+
+export function cleanObject(obj) {
+  const cleanedObj = {};
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key) && obj[key] !== undefined) {
+      cleanedObj[key] = obj[key];
+    }
+  }
+  return cleanedObj;
+}

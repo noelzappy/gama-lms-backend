@@ -3,6 +3,7 @@ import { PaymentDocument } from '@/interfaces/payment.interface';
 import { PaymentModel } from '@/models/payment.model';
 import { PaginateResult } from '@/models/plugins/paginate.plugin';
 import { Schema } from 'mongoose';
+import { cleanObject } from '@/utils/misc';
 
 @Service()
 export class PaymentService {
@@ -31,7 +32,7 @@ export class PaymentService {
     if (!payment) {
       return null;
     }
-    payment.set(data);
+    payment.set(cleanObject(data));
     await payment.save();
     return payment;
   }

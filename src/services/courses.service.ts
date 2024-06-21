@@ -7,6 +7,7 @@ import { CourseModel } from '@/models/course.model';
 import { CreateCourseDto, UpdateCourseDto } from '@/dtos/course.dto';
 import { CoursePurchaseModel } from '@/models/coursePurchase.model';
 import { Schema } from 'mongoose';
+import { cleanObject } from '@/utils/misc';
 
 @Service()
 export class CourseService {
@@ -30,7 +31,7 @@ export class CourseService {
     const course = await CourseModel.findById(courseId);
     if (!course) throw new HttpException(httpStatus.NOT_FOUND, 'Course not found');
 
-    Object.assign(course, courseData);
+    course.set(cleanObject(courseData));
 
     await course.save();
     return course;

@@ -24,8 +24,6 @@ export class AuthService {
   }> {
     const findUser = await UserModel.findOne({ email: userData.email });
 
-    console.log('DDD', findUser, userData);
-
     if (findUser) throw new HttpException(httpStatus.BAD_REQUEST, 'Email already taken');
 
     const hashedPassword = await hash(userData.password, 10);

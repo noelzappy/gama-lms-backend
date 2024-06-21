@@ -5,6 +5,7 @@ import { CourseLessonModel } from '@/models/courseLesson.model';
 import { CourseLessonDocument } from '@/interfaces/courses.interface';
 import { PaginateResult } from '@/models/plugins/paginate.plugin';
 import { CreateCourseLessonDto, UpdateCourseLessonDto } from '@/dtos/course.dto';
+import { cleanObject } from '@/utils/misc';
 
 @Service()
 export class CourseLessonService {
@@ -33,7 +34,7 @@ export class CourseLessonService {
     const _courseLesson = await CourseLessonModel.findById(courseLessonId);
     if (!_courseLesson) throw new HttpException(httpStatus.NOT_FOUND, "CourseLesson doesn't exist");
 
-    Object.assign(_courseLesson, courseLessonData);
+    Object.assign(_courseLesson, cleanObject(courseLessonData));
     await _courseLesson.save();
     return _courseLesson;
   }

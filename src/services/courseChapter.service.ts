@@ -5,6 +5,7 @@ import { CourseChapterModel } from '@/models/courseChapter.model';
 import { CourseChapterDocument } from '@/interfaces/courses.interface';
 import { CreateCourseChapterDto, UpdateCourseChapterDto } from '@/dtos/course.dto';
 import { PaginateResult } from '@/models/plugins/paginate.plugin';
+import { cleanObject } from '@/utils/misc';
 
 @Service()
 export class CourseChapterService {
@@ -33,7 +34,7 @@ export class CourseChapterService {
     const _courseChapter = await CourseChapterModel.findById(courseChapterId);
     if (!_courseChapter) throw new HttpException(httpStatus.NOT_FOUND, "CourseChapter doesn't exist");
 
-    Object.assign(_courseChapter, courseChapterData);
+    Object.assign(_courseChapter, cleanObject(courseChapterData));
     await _courseChapter.save();
     return _courseChapter;
   }

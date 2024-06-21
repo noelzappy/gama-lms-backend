@@ -5,6 +5,7 @@ import { PaginateResult } from '@/models/plugins/paginate.plugin';
 import CourseCategoryModel from '@/models/courseCategory.model';
 import { CreateCourseCategoryDto, UpdateCourseCategoryDto } from '@/dtos/course.dto';
 import { CourseCategoryDocument } from '@/interfaces/courses.interface';
+import { cleanObject } from '@/utils/misc';
 
 @Service()
 export class CourseCategoryService {
@@ -28,7 +29,7 @@ export class CourseCategoryService {
     const courseCategory = await CourseCategoryModel.findById(courseCategoryId);
     if (!courseCategory) throw new HttpException(httpStatus.NOT_FOUND, 'Course category not found');
 
-    courseCategory.set(courseCategoryData);
+    courseCategory.set(cleanObject(courseCategoryData));
     await courseCategory.save();
     return courseCategory;
   }

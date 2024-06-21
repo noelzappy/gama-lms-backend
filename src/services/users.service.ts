@@ -5,6 +5,7 @@ import httpStatus from 'http-status';
 import { UserModel } from '@models/users.model';
 import { UserDocument } from '@/interfaces/users.interface';
 import { RegisterUserDto, UpdateUserDto } from '@/dtos/users.dto';
+import { cleanObject } from '@/utils/misc';
 
 @Service()
 export class UserService {
@@ -44,7 +45,7 @@ export class UserService {
     const _user = await UserModel.findById(userId);
     if (!_user) throw new HttpException(httpStatus.NOT_FOUND, "User doesn't exist");
 
-    Object.assign(_user, userData);
+    Object.assign(_user, cleanObject(userData));
     await _user.save();
     return _user;
   }
