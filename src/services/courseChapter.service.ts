@@ -15,7 +15,7 @@ export class CourseChapterService {
   }
 
   public async findCourseChapterById(courseChapterId: string): Promise<CourseChapterDocument> {
-    const findCourseChapter = await CourseChapterModel.findOne({ _id: courseChapterId });
+    const findCourseChapter = await CourseChapterModel.findById(courseChapterId).populate('course media');
     if (!findCourseChapter) throw new HttpException(httpStatus.NOT_FOUND, "CourseChapter doesn't exist");
 
     return findCourseChapter;
