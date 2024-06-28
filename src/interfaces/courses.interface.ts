@@ -36,6 +36,7 @@ export interface CourseChapterDocument extends Document {
   description: string;
   duration: string;
   order: number;
+  media: Schema.Types.ObjectId;
 }
 
 export interface CourseLessonDocument extends Document {

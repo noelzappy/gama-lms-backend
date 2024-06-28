@@ -136,6 +136,10 @@ export class CreateCourseChapterDto {
   @IsInt()
   @IsNotEmpty()
   public order: number;
+
+  @IsString()
+  @IsOptional()
+  public media: Schema.Types.ObjectId;
 }
 
 export class UpdateCourseChapterDto {

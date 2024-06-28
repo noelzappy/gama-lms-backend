@@ -88,6 +88,8 @@ export class CourseController {
       throw new Error('Course ID is required');
     }
 
+    options.populate = 'course media';
+
     const chapters = await this.chapters.queryCourseChapters(filter, options);
 
     res.status(httpStatus.OK).json(chapters);
@@ -115,6 +117,8 @@ export class CourseController {
     filter.chapter = chapterId;
 
     const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+    options.populate = 'chapter media';
 
     const lessons = await this.lesson.queryCourseLessons(filter, options);
 

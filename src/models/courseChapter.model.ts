@@ -31,6 +31,11 @@ const CourseChapterSchema = new Schema<CourseChapterDocument>(
       type: Number,
       default: 0,
     },
+    media: {
+      type: Schema.Types.ObjectId,
+      ref: 'Media',
+      default: null,
+    },
   },
   {
     timestamps: true,
